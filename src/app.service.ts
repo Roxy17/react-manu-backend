@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import fs = require('fs');
 import path = require('path');
-import { CreateMenuDto } from './dto/create-menu.dto';
+import { MenuDto } from './dto/menu.dto';
 
 @Injectable()
 export class AppService {
@@ -15,7 +15,7 @@ export class AppService {
     return JSON.stringify(menuArr);
   }
 
-  addMenu(menu: CreateMenuDto) {
+  addMenu(menu: MenuDto) {
     const menuData = this.readMenu();
     const isExistMenu = menuData.find((item) => item.id === menu.id);
 
@@ -28,6 +28,48 @@ export class AppService {
     }
 
     return menu;
+  }
+
+  updateMenu(menu: MenuDto) {
+    const menuData = this.readMenu();
+    const isExistMenu = menuData.find((item) => item.id === menu.id);
+
+    if (isExistMenu) {
+      const updateMenu = menuData.map((item) => {
+        if (item.id === menu.id) {
+          return {
+            id: menu.id,
+            title: menu.title,
+            description: menu.description,
+            image: menu.image,
+          };
+        }
+        return item;
+      });
+
+      this.writeMenu(updateMenu);
+
+      return 'Menu succession update';
+    } else {
+      throw new NotFoundException('Menu not found');
+    }
+
+    return menu;
+  }
+
+  deleteMenu(id: number) {
+    const menuData: MenuDto[] = this.readMenu();
+    const isExistMenu = menuData.find((item) => item.id === id);
+
+    if (!isExistMenu) {
+      throw new NotFoundException('Menu not found');
+    } else {
+      const updateMenu = menuData.filter((item) => item.id !== id);
+
+      this.writeMenu(updateMenu);
+    }
+
+    return 'menu delete';
   }
 
   getDir(name: string, num: number) {
@@ -48,7 +90,7 @@ export class AppService {
     }
   }
 
-  writeMenu(menu: CreateMenuDto) {
+  writeMenu(menu: MenuDto[]) {
     const dir = this.getDir('menu', -5);
 
     fs.writeFile(dir, JSON.stringify(menu), 'utf-8', (error) => {

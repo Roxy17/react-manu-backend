@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateMenuDto {
+export class MenuDto {
   @ApiProperty()
   id: number;
 
